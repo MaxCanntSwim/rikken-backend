@@ -39,7 +39,11 @@ public class RondeController {
 
         String[] voorb = voor.split(",\\s*");
         String[] tegenb = tegen.split(",\\s*");
-        if (voorb.length + tegenb.length != 5 && (voor.isEmpty()  || tegen.isEmpty())) return ResponseEntity.badRequest().build(); // Check if there are 4 players
+        if (
+                !((voorb.length + tegenb.length == 4 && !voor.isEmpty()  && !tegen.isEmpty()) ||
+                        (voorb.length + tegenb.length == 5 && (voor.isEmpty()  || tegen.isEmpty())))){
+            return ResponseEntity.badRequest().build();
+        } // Check if there are 4 players
         int puntenb = Integer.parseInt(punten);
         RondeType rondeType1 = null;
         try {
@@ -77,14 +81,14 @@ public class RondeController {
     }
 
     @DeleteMapping("/{id}/delete")
-    public ResponseEntity<?> deleteRondeById(Long id) {
+    public ResponseEntity<?> deleteRondeById(@PathVariable("id") Long id) {
         if (!rondeRepository.existsById(id)) return ResponseEntity.badRequest().build();
         rondeRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/get")
-    public ResponseEntity<?> getRondeById(Long id) {
+    public ResponseEntity<?> getRondeById(@PathVariable("id") Long id) {
         if (!rondeRepository.existsById(id)) return ResponseEntity.badRequest().build();
         return ResponseEntity.ok(rondeRepository.findById(id).orElse(null));
     }

@@ -12,7 +12,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/player/**").permitAll()  // Allow access to /api/player
+                        .requestMatchers("/api/**").permitAll()  // Allow access to /api/player
                         .anyRequest().authenticated()  // Require authentication for other endpoints
                 )
                 .csrf().disable();  // Disable CSRF for testing (enable in production)
