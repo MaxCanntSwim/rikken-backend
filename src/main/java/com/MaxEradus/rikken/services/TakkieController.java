@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -35,8 +36,12 @@ public class TakkieController {
         String ronde2id = body.get("ronde2");
         String ronde3id = body.get("ronde3");
         String ronde4id = body.get("ronde4");
-        if (isNullOrEmpty(ronde1id) || isNullOrEmpty(ronde2id) || isNullOrEmpty(ronde3id) || isNullOrEmpty(ronde4id)) return ResponseEntity.badRequest().build(); // Check for empty fields
-        if (!isNumeric(ronde1id) || !isNumeric(ronde2id) || !isNumeric(ronde3id) || !isNumeric(ronde4id)) return ResponseEntity.badRequest().build(); // Check for numeric fields
+        if (isNullOrEmpty(ronde1id) || isNullOrEmpty(ronde2id) || isNullOrEmpty(ronde3id) || isNullOrEmpty(ronde4id)) {
+            return ResponseEntity.badRequest().body(createMessage("One or more fields are empty"));
+        }
+        if (!isNumeric(ronde1id) || !isNumeric(ronde2id) || !isNumeric(ronde3id) || !isNumeric(ronde4id)) {
+            return ResponseEntity.badRequest().body(createMessage("One or more fields are not numeric"));
+        }
         Long ronde1 = Long.parseLong(ronde1id);
         Long ronde2 = Long.parseLong(ronde2id);
         Long ronde3 = Long.parseLong(ronde3id);
@@ -52,30 +57,36 @@ public class TakkieController {
             ronde3a = (Ronde) rondeController.getRondeById(ronde3).getBody();
             ronde4a = (Ronde) rondeController.getRondeById(ronde4).getBody();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(createMessage("Error retrieving ronde"));
         }
         Takkie takkie = new Takkie(ronde1a, ronde2a, ronde3a, ronde4a);
-        return ResponseEntity.ok(takkieRepository.save(takkie));
+        return ResponseEntity.ok(createMessage("Takkie created successfully", takkieRepository.save(takkie)));
     }
 
     @PostMapping("/createEmpty")
     public ResponseEntity<?> createTakkieEmpty() {
         Takkie takkie = new Takkie();
-        return ResponseEntity.ok(takkieRepository.save(takkie));
+        return ResponseEntity.ok(createMessage("Empty Takkie created successfully", takkieRepository.save(takkie)));
     }
 
     @PutMapping("/{id}/addRonde")
     public ResponseEntity<?> addRondeToTakkie(@PathVariable("id") Long id, @RequestBody Map<String,String> body) {
-        if (!takkieRepository.existsById(id)) return ResponseEntity.badRequest().build();
+        if (!takkieRepository.existsById(id)) {
+            return ResponseEntity.badRequest().body(createMessage("Takkie not found"));
+        }
         String rondeid = body.get("ronde");
-        if (isNullOrEmpty(rondeid)) return ResponseEntity.badRequest().build(); // Check for empty fields
-        if (!isNumeric(rondeid)) return ResponseEntity.badRequest().build(); // Check for numeric fields
+        if (isNullOrEmpty(rondeid)) {
+            return ResponseEntity.badRequest().body(createMessage("Ronde ID is empty"));
+        }
+        if (!isNumeric(rondeid)) {
+            return ResponseEntity.badRequest().body(createMessage("Ronde ID is not numeric"));
+        }
         Long ronde = Long.parseLong(rondeid);
-        Ronde rondea = null;
+        Ronde rondea;
         try {
             rondea = (Ronde) rondeController.getRondeById(ronde).getBody();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(createMessage("Error retrieving ronde"));
         }
         Takkie takkie = takkieRepository.findById(id).get();
         if (takkie.getRonde1() == null) {
@@ -87,20 +98,24 @@ public class TakkieController {
         } else if (takkie.getRonde4() == null) {
             takkie.setRonde4(rondea);
         } else {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(createMessage("All Ronde slots are filled"));
         }
-        return ResponseEntity.ok(takkieRepository.save(takkie));
+        return ResponseEntity.ok(createMessage("Ronde added to Takkie successfully", takkieRepository.save(takkie)));
     }
 
     @GetMapping("/{id}/get")
     public ResponseEntity<?> getTakkieById(@PathVariable("id") Long id) {
-        if (!takkieRepository.existsById(id)) return ResponseEntity.badRequest().build();
-        return ResponseEntity.ok(takkieRepository.findById(id));
+        if (!takkieRepository.existsById(id)) {
+            return ResponseEntity.badRequest().body(createMessage("Takkie not found"));
+        }
+        return ResponseEntity.ok(takkieRepository.findById(id).orElse(null));
     }
 
     @DeleteMapping("/{id}/delete")
     public ResponseEntity<?> deleteTakkieById(@PathVariable("id") Long id) {
-        if (!takkieRepository.existsById(id)) return ResponseEntity.badRequest().build();
+        if (!takkieRepository.existsById(id)) {
+            return ResponseEntity.badRequest().body(createMessage("Takkie not found"));
+        }
         takkieRepository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
@@ -108,7 +123,21 @@ public class TakkieController {
     static Boolean isNullOrEmpty(String s) {
         return s == null || s.isEmpty();
     }
+
     public static boolean isNumeric(String str) {
         return str.matches("-?\\d+");  // Matches positive or negative integers
+    }
+
+    private Map<String, Object> createMessage(String message) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        return response;
+    }
+
+    private Map<String, Object> createMessage(String message, Object data) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", message);
+        response.put("data", data);
+        return response;
     }
 }

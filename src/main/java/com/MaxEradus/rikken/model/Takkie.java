@@ -30,6 +30,14 @@ public class Takkie {
         this.ronde4 = ronde4;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public Ronde getRonde1() {
         return ronde1;
     }
