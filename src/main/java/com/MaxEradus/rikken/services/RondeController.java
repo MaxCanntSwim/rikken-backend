@@ -90,7 +90,7 @@ public class RondeController {
     @GetMapping("/{id}/get")
     public ResponseEntity<?> getRondeById(@PathVariable("id") Long id) {
         if (!rondeRepository.existsById(id)) return ResponseEntity.badRequest().build();
-        return ResponseEntity.ok(rondeRepository.findById(id).orElse(null));
+        return ResponseEntity.ok(rondeRepository.findById(id));
     }
 
     static Boolean isNullOrEmpty(String s) {
