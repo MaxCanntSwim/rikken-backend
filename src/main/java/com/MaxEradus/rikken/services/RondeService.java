@@ -6,10 +6,7 @@ import com.MaxEradus.rikken.model.Ronde;
 import com.MaxEradus.rikken.model.RondeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -25,6 +22,11 @@ public class RondeService {
     public RondeService(RondeRepository rondeRepository, PlayerController playerController) {
         this.rondeRepository = rondeRepository;
         this.playerController = playerController;
+    }
+
+    @GetMapping(path = {"","/"})
+    public ResponseEntity<?> getAll() {
+        return ResponseEntity.ok(rondeRepository.findAll());
     }
 
     @PostMapping(path = "/create")
@@ -74,12 +76,17 @@ public class RondeService {
         return ResponseEntity.ok(rondeRepository.save(ronde));
     }
 
-    public void deleteRondeById(Long id) {
+    @DeleteMapping("/{id}/delete")
+    public ResponseEntity<?> deleteRondeById(Long id) {
+        if (!rondeRepository.existsById(id)) return ResponseEntity.badRequest().build();
         rondeRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
-    public Ronde getRondeById(Long id) {
-        return rondeRepository.findById(id).orElse(null);
+    @GetMapping("/{id}/get")
+    public ResponseEntity<?> getRondeById(Long id) {
+        if (!rondeRepository.existsById(id)) return ResponseEntity.badRequest().build();
+        return ResponseEntity.ok(rondeRepository.findById(id).orElse(null));
     }
 
     static Boolean isNullOrEmpty(String s) {
