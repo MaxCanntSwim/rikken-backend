@@ -13,13 +13,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ronde")
-public class RondeService {
+public class RondeController {
 
     @Autowired
     private final RondeRepository rondeRepository;
     private final PlayerController playerController;
 
-    public RondeService(RondeRepository rondeRepository, PlayerController playerController) {
+    public RondeController(RondeRepository rondeRepository, PlayerController playerController) {
         this.rondeRepository = rondeRepository;
         this.playerController = playerController;
     }

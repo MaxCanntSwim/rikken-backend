@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/takkie")
-public class TakkieService {
+public class TakkieController {
 
     @Autowired
     public final TakkieRepository takkieRepository;
     public final PlayerController playerController;
-    public final RondeService rondeService;
+    public final RondeController rondeController;
 
-    public TakkieService(TakkieRepository takkieRepository, PlayerController playerController, RondeService rondeService) {
+    public TakkieController(TakkieRepository takkieRepository, PlayerController playerController, RondeController rondeController) {
         this.takkieRepository = takkieRepository;
         this.playerController = playerController;
-        this.rondeService = rondeService;
+        this.rondeController = rondeController;
     }
 
     public Takkie createTakkieWhole(Ronde ronde1, Ronde ronde2, Ronde ronde3, Ronde ronde4) {
